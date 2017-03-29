@@ -13,3 +13,23 @@ State machine files located at CPSC495/src/cpsc495_flexbe/cpsc495_flexbe_behavio
 
 -----------
 
+turtlebot topic publishes picture feed to-- topic : /turtlebot/camera/rgb/image_raw
+
+
+----------------------------
+
+Lab5_Blab_find node publishes XY of ball to-- topic : /makethisup
+
+
+
+
+
+______________TODO________________________________________
+1. test/verify lab5_blob_find node by itself
+2. create sate machine in flexBe to
+    a. subscribe to topic :/makethisup
+    b. calcualte diff in ball position vs desired position
+    c. decide to move or not move (is it centered)
+    d. publish twistTimed command
+    
+3. DONE
