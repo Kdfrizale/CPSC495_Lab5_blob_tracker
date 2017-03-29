@@ -1,0 +1,15 @@
+roscore
+roslaunch chris_world_models gazebo_empty_world.launch
+roslaunch chris_turtlebot_bringup chris_turtlebot_gazebo.launch
+--------------------------------------------------------------
+
+
+roslaunch cpsc495_flexbe_behaviors cpsc495_flexbe_behaviors.launch
+
+
+----------------------------
+State machine files located at CPSC495/src/cpsc495_flexbe/cpsc495_flexbe_behaviors/src/cpsc495_flexbe_behaviors
+
+
+-----------
+
