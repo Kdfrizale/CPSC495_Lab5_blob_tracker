@@ -11,6 +11,7 @@ from flexbe_states.subscriber_state import SubscriberState
 from flexbe_states.calculation_state import CalculationState
 from flexbe_states.decision_state import DecisionState
 from cpsc495_flexbe_flexbe_states.timed_twist_state import TimedTwistState
+from flexbe_states.wait_state import WaitState
 # Additional imports can be added inside the following tags
 # [MANUAL_IMPORT]
 
@@ -45,7 +46,7 @@ class Lab5_State_MachineSM(Behavior):
 
 
 	def create(self):
-		# x:1162 y:100, x:430 y:408
+		# x:1162 y:100, x:318 y:599
 		_state_machine = OperatableStateMachine(outcomes=['finished', 'failed'])
 
 		# Additional creation code can be added inside the following tags
@@ -55,12 +56,12 @@ class Lab5_State_MachineSM(Behavior):
 
 
 		with _state_machine:
-			# x:114 y:123
-			OperatableStateMachine.add('Get_Ball_XY',
-										SubscriberState(topic=/mine/makethisup, blocking=True, clear=False),
-										transitions={'received': 'Calculate_DIFF_FROM_DESIRED', 'unavailable': 'failed'},
+			# x:409 y:290
+			OperatableStateMachine.add('GetTwistCommand',
+										SubscriberState(topic=makethisup, blocking=True, clear=False),
+										transitions={'received': 'Move_The_Robot', 'unavailable': 'failed'},
 										autonomy={'received': Autonomy.Off, 'unavailable': Autonomy.Off},
-										remapping={'message': 'BALL_XY'})
+										remapping={'message': 'myTwistCommand'})
 
 			# x:293 y:51
 			OperatableStateMachine.add('Calculate_DIFF_FROM_DESIRED',
@@ -87,6 +88,25 @@ class Lab5_State_MachineSM(Behavior):
 										TimedTwistState(target_time=0, velocity=0, rotation_rate=0, cmd_topic='cmd_vel'),
 										transitions={'done': 'finished'},
 										autonomy={'done': Autonomy.Off})
+
+			# x:660 y:328
+			OperatableStateMachine.add('Move_The_Robot',
+										TimedTwistState(target_time=.1, velocity=myTwistCommand.linear, rotation_rate=myTwistCommand.angular, cmd_topic='cmd_vel'),
+										transitions={'done': 'simpleWait'},
+										autonomy={'done': Autonomy.Off})
+
+			# x:471 y:488
+			OperatableStateMachine.add('simpleWait',
+										WaitState(wait_time=.01),
+										transitions={'done': 'GetTwistCommand'},
+										autonomy={'done': Autonomy.Off})
+
+			# x:178 y:31
+			OperatableStateMachine.add('Get_Ball_XY',
+										SubscriberState(topic=/mine/makethisup, blocking=True, clear=False),
+										transitions={'received': 'Calculate_DIFF_FROM_DESIRED', 'unavailable': 'failed'},
+										autonomy={'received': Autonomy.Off, 'unavailable': Autonomy.Off},
+										remapping={'message': 'BALL_XY'})
 
 
 		return _state_machine
