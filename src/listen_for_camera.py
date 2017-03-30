@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import rospy
-from std_msgs.msg import String
+from std_msgs.msg import Int32
+from geometry_msgs.msg import Twist
+from sensor_msgs.msg import Image
 from collections import deque
 import cv2
 import numpy as np
@@ -15,7 +17,7 @@ def callback(data):
 
 def findBlob(imageReceived):
     ##ROS SETUP FOR PUBLISHER
-    pub = rospy.Publisher('chatter', String, queue_size=10)###CHANGE TO CORRECT TOPIC TO PUBLISH TO
+    pub = rospy.Publisher('makethisup', Twist, queue_size=10)###CHANGE TO CORRECT TOPIC TO PUBLISH TO
     
 
     ##CODE TO GET CENTER OF BLOB
@@ -50,10 +52,22 @@ def findBlob(imageReceived):
 	   	#print(M["m00"])
 	   	if not(M["m00"] == 0):
 	   		center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+	   		ball_x = int(M["m10"] / M["m00"])
+	   		ball_y = int(M["m01"] / M["m00"])
 
 
-	###Publish center
-	pub.publish(center) ###############################May need to format center first
+        ###Calculate how to move the robot to aling ball in image
+	Ydesired = 240 ###Half of the height of the image
+	Xdesired = 320 ###Half of the width of the image
+	Kpv = -1
+	Kpw = 1
+        
+	
+	###Publish command
+	formatted_result = Twist()
+	formatted_result.linear = Kpv*(Ydesired - ball_y)
+	formatted_result.angular = Kpw*(Xdesired - ball_x)
+	pub.publish(formatted_result) 
 
 ##	k = cv2.waitKey(5) & 0xFF
 ##        if k == 27:
@@ -69,7 +83,7 @@ def listener_for_camera():
     # run simultaneously.
     rospy.init_node('listener_for_camera', anonymous=True)
 
-    rospy.Subscriber("chatter", String, findBlob)######################CHange this to get camera INFO for turtlebot
+    rospy.Subscriber("/turtlebot/camera/rgb/image_raw", Image, findBlob)
 
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()

@@ -42,11 +42,13 @@ while(1):
 	#For finding contours and drawing circle around focal point
 	if len(cnts) > 0:
 	  	c = max(cnts, key=cv2.contourArea)
-	   	((x, y), radius) = cv2.minEnclosingCircle(c)
+                ((x, y), radius) = cv2.minEnclosingCircle(c)
 	   	M = cv2.moments(c)
 	   	#print(M["m00"])
 	   	if not(M["m00"] == 0):
 	   		center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+	   		print center
+	   		
 
 	k = cv2.waitKey(5) & 0xFF
         if k == 27:
