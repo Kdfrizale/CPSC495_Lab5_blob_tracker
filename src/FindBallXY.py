@@ -12,7 +12,7 @@ import argparse
 def nothing(x):
     pass
 
-
+cv2.namedWindow('image')
 
 def draw_flow(img, flow, step=16): #step = 16, named parameter
     h, w = img.shape[:2]
@@ -39,7 +39,6 @@ def draw_flow(img, flow, step=16): #step = 16, named parameter
 
 def findBlob(imageReceived):
     # construct the argument parse and parse the arguments
-    print 'hello2'
     ap = argparse.ArgumentParser()
     ap.add_argument("-v", "--video",
          help="path to the (optional) video file")
@@ -48,6 +47,7 @@ def findBlob(imageReceived):
     args = vars(ap.parse_args())
 
     pts = deque(maxlen=args["buffer"])
+
     #easy assigments
     hh='Hue High'
     hl='Hue Low'
@@ -55,8 +55,7 @@ def findBlob(imageReceived):
     sl='Saturation Low'
     vh='Value High'
     vl='Value Low'
-    
-    cv2.namedWindow('image')
+
     cv2.createTrackbar(hl, 'image',0,179,nothing)
     cv2.createTrackbar(hh, 'image',0,179,nothing)
     cv2.createTrackbar(sl, 'image',0,255,nothing)
@@ -64,16 +63,10 @@ def findBlob(imageReceived):
     cv2.createTrackbar(vl, 'image',0,255,nothing)
     cv2.createTrackbar(vh, 'image',0,255,nothing)
 
-    print 'hello3'
     #cap = cv2.VideoCapture(0)
     #ret, prev = cap.read()
-    print 'hello4'
     prev = cv2.imread("trash.jpg")
-    print 'hello5'
-    cv2.imshow('image', prev)
-    test = raw_input("lhkjdfl")
     prevgray = cv2.cvtColor(prev, cv2.COLOR_BGR2GRAY)
-    print 'hello6'
     show_hsv = False
     show_glitch = False
     cur_glitch = prev.copy()
@@ -140,18 +133,13 @@ def findBlob(imageReceived):
 
 
 
-def listener_for_camera():
-    rospy.init_node('listener_for_camera', anonymous=True)
+def FindBallXY():
+    rospy.init_node('FindBallXY, anonymous=True)
 
     rospy.Subscriber("/turtlebot/camera/rgb/image_raw", Image, findBlob)
-    print 'hello1'
 
     # spin() simply keeps python from exiting until this node is stopped
-    rospy.spin()
-
-
-if __name__ == '__main__':
-    listener_for_camera()
+    #rospy.spin()
 
 
 
@@ -161,4 +149,12 @@ if __name__ == '__main__':
 
 
 
-#cv2.destroyAllWindows()
+
+
+
+
+
+
+
+
+cv2.destroyAllWindows()
