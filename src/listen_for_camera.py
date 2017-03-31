@@ -166,7 +166,7 @@ def listener_for_camera():
     rospy.init_node('listener_for_camera', anonymous=True)
 
     rospy.Subscriber("/turtlebot/camera/rgb/image_raw", Image, findBlob)
-    print 'hello1'
+
 
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
