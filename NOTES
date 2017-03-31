@@ -3,8 +3,9 @@ roslaunch chris_world_models gazebo_empty_world.launch
 roslaunch chris_turtlebot_bringup chris_turtlebot_gazebo.launch
 --------------------------------------------------------------
 
-
+rosrun Lab5_blob_tracker listen_for_camera.py 
 roslaunch cpsc495_flexbe_behaviors cpsc495_flexbe_behaviors.launch
+
 
 
 ----------------------------
