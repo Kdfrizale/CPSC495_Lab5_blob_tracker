@@ -111,7 +111,7 @@ def findBlob(imageReceived):
 
     #apply the range on a mask
     mask = cv2.inRange(hsv,HSVLOW, HSVHIGH)
-    ##res = cv2.bitwise_and(Gaussianframe,Gaussianframe, mask =mask)
+    res = cv2.bitwise_and(Gaussianframe,Gaussianframe, mask =mask)
     ##cv2.imshow('flow_mask', draw_flow(mask, flow))
     cnts = cv2.findContours(mask, cv2.RETR_EXTERNAL,
     cv2.CHAIN_APPROX_SIMPLE)[-2]
@@ -134,24 +134,24 @@ def findBlob(imageReceived):
                 (0, 255, 255), 2)
             cv2.circle(Gaussianframe, center, 1, (0, 0, 255), -1)
 
-    print center
-    ##pts.appendleft(center)
+        print center
+        ##pts.appendleft(center)
 
-    ###Calculate how to move the robot to aling ball in image
-    Ydesired = 240 ###Half of the height of the image
-    Xdesired = 320 ###Half of the width of the image
-    Kpv = -1
-    Kpw = 1
+        ###Calculate how to move the robot to aling ball in image
+        Ydesired = 240 ###Half of the height of the image
+        Xdesired = 320 ###Half of the width of the image
+        Kpv = -1
+        Kpw = 1
 
-    print ball_x
-    print ball_y
+        print ball_x
+        print ball_y
 
-    ###Publish command
-    formatted_result = Twist()
-    formatted_result.linear.x = Kpv*(Ydesired - ball_y)
-    formatted_result.angular.x = Kpw*(Xdesired - ball_x)
-    pub.publish(formatted_result)
-    #cv2.imshow('image', res)
+        ###Publish command
+        formatted_result = Twist()
+        formatted_result.linear.x = Kpv*(Ydesired - ball_y)
+        formatted_result.angular.x = Kpw*(Xdesired - ball_x)
+        pub.publish(formatted_result)
+    cv2.imshow('image', res)
     cv2.imshow('yay', Gaussianframe)
     k = cv2.waitKey(5) & 0xFF
 

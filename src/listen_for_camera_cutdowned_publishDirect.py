@@ -3,7 +3,7 @@ import roslib
 from cv_bridge import CvBridge, CvBridgeError
 import rospy
 from std_msgs.msg import Int32
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import TwistStamped
 from sensor_msgs.msg import Image
 from collections import deque
 import cv2
@@ -41,26 +41,26 @@ def draw_flow(img, flow, step=16): #step = 16, named parameter
 
 def findBlob(imageReceived):
     ##ROS SETUP FOR PUBLISHER
-    pub = rospy.Publisher('makethisup', Twist, queue_size=10)###CHANGE TO CORRECT TOPIC TO PUBLISH TO
+    pub = rospy.Publisher('/turtlebot/stamped_cmd_vel_mux/input/navi', TwistStamped, queue_size=10)###CHANGE TO CORRECT TOPIC TO PUBLISH TO
 
 
     ##Convert ROS NODE PICTURE TO CV2 FORMAT
     myBridge = CvBridge()
     cv_image = myBridge.imgmsg_to_cv2(imageReceived,"bgr8")
 
-    cv2.imshow('hello', cv_image)
+    #cv2.imshow('hello', cv_image)
     #cv2.waitKey(3)
 
 
     # construct the argument parse and parse the arguments
-    ap = argparse.ArgumentParser()
-    ap.add_argument("-v", "--video",
-         help="path to the (optional) video file")
-    ap.add_argument("-b", "--buffer", type=int, default=64,
-         help="max buffer size")
-    args = vars(ap.parse_args())
+    #ap = argparse.ArgumentParser()
+    #ap.add_argument("-v", "--video",
+    #     help="path to the (optional) video file")
+    #ap.add_argument("-b", "--buffer", type=int, default=64,
+    #     help="max buffer size")
+    #args = vars(ap.parse_args())
 
-    pts = deque(maxlen=args["buffer"])
+    #pts = deque(maxlen=args["buffer"])
     #easy assigments
     hh='Hue High'
     hl='Hue Low'
@@ -79,18 +79,18 @@ def findBlob(imageReceived):
 
     #cap = cv2.VideoCapture(0)
     #ret, prev = cap.read()
-    prev = cv_image
-    prevgray = cv2.cvtColor(prev, cv2.COLOR_BGR2GRAY)
-    show_hsv = False
-    show_glitch = False
-    cur_glitch = prev.copy()
+    #prev = cv_image
+    #prevgray = cv2.cvtColor(prev, cv2.COLOR_BGR2GRAY)
+    #show_hsv = False
+    #show_glitch = False
+    #cur_glitch = prev.copy()
 
     #ret, frame = cap.read()
     frame = cv_image
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    flow = cv2.calcOpticalFlowFarneback(prevgray, gray, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+    #gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    #flow = cv2.calcOpticalFlowFarneback(prevgray, gray, None, 0.5, 3, 15, 3, 5, 1.2, 0)
     #print(len(flow[1][0]))
-    prevgray = gray
+    #prevgray = gray
 
 
     Gaussianframe=cv2.GaussianBlur(frame,(5,5),0)
@@ -99,12 +99,12 @@ def findBlob(imageReceived):
 
     #cv2.imshow('flow_mask', draw_flow(mask, flow))
     #read trackbar positions for all
-    hul=cv2.getTrackbarPos(hl, 'image')
-    huh=cv2.getTrackbarPos(hh, 'image')
-    sal=cv2.getTrackbarPos(sl, 'image')
-    sah=cv2.getTrackbarPos(sh, 'image')
-    val=cv2.getTrackbarPos(vl, 'image')
-    vah=cv2.getTrackbarPos(vh, 'image')
+    hul=5 #cv2.getTrackbarPos(hl, 'image')
+    huh=26 #cv2.getTrackbarPos(hh, 'image')
+    sal=0 #cv2.getTrackbarPos(sl, 'image')
+    sah=255 #cv2.getTrackbarPos(sh, 'image')
+    val=0 #cv2.getTrackbarPos(vl, 'image')
+    vah=255 #cv2.getTrackbarPos(vh, 'image')
     #make array for final values
     HSVLOW=np.array([hul,sal,val])
     HSVHIGH=np.array([huh,sah,vah])
@@ -112,7 +112,7 @@ def findBlob(imageReceived):
     #apply the range on a mask
     mask = cv2.inRange(hsv,HSVLOW, HSVHIGH)
     res = cv2.bitwise_and(Gaussianframe,Gaussianframe, mask =mask)
-    cv2.imshow('flow_mask', draw_flow(mask, flow))
+    ##cv2.imshow('flow_mask', draw_flow(mask, flow))
     cnts = cv2.findContours(mask, cv2.RETR_EXTERNAL,
     cv2.CHAIN_APPROX_SIMPLE)[-2]
     center = None
@@ -135,7 +135,7 @@ def findBlob(imageReceived):
             cv2.circle(Gaussianframe, center, 1, (0, 0, 255), -1)
 
         print center
-        pts.appendleft(center)
+        ##pts.appendleft(center)
 
         ###Calculate how to move the robot to aling ball in image
         Ydesired = 240 ###Half of the height of the image
@@ -147,9 +147,9 @@ def findBlob(imageReceived):
         print ball_y
 
         ###Publish command
-        formatted_result = Twist()
-        formatted_result.linear.x = Kpv*(Ydesired - ball_y)
-        formatted_result.angular.x = Kpw*(Xdesired - ball_x)
+        formatted_result = TwistStamped()
+        formatted_result.twist.linear.x = Kpv*(Ydesired - ball_y)/100
+        formatted_result.twist.angular.z = Kpw*(Xdesired - ball_x)/100
         pub.publish(formatted_result)
     cv2.imshow('image', res)
     cv2.imshow('yay', Gaussianframe)
