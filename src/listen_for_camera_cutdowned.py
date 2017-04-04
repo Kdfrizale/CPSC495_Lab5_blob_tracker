@@ -41,8 +41,8 @@ def draw_flow(img, flow, step=16): #step = 16, named parameter
 
 def findBlob(imageReceived):
     ##ROS SETUP FOR PUBLISHER
-    pub = rospy.Publisher('makethisup', Twist, queue_size=10)###CHANGE TO CORRECT TOPIC TO PUBLISH TO
-
+    pub = rospy.Publisher('makethisupang', Int32, queue_size=10)###CHANGE TO CORRECT TOPIC TO PUBLISH TO
+    pub2 = rospy.Publisher('makethisupvel', Int32, queue_size=10)
 
     ##Convert ROS NODE PICTURE TO CV2 FORMAT
     myBridge = CvBridge()
@@ -150,7 +150,8 @@ def findBlob(imageReceived):
         formatted_result = Twist()
         formatted_result.linear.x = Kpv*(Ydesired - ball_y)
         formatted_result.angular.x = Kpw*(Xdesired - ball_x)
-        pub.publish(formatted_result)
+        pub2.publish(int(Kpv*(Ydesired - ball_y)/100))
+        pub.publish(int(Kpw*(Xdesired - ball_x)/100))
     cv2.imshow('image', res)
     cv2.imshow('yay', Gaussianframe)
     k = cv2.waitKey(5) & 0xFF
