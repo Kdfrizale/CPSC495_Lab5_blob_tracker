@@ -21,16 +21,16 @@ class KyleTwistState(EventState):
     <= done                 Given time has passed.
     '''
 
-    def __init__(self, velocity, rotation_rate, cmd_topic='cmd_vel'):
+    def __init__(self, cmd_topic='cmd_vel'):
         # Declare outcomes, input_keys, and output_keys by calling the super constructor with the corresponding arguments.
-        super(KyleTwistState, self).__init__(outcomes = ['done'],
+        super(KyleTwistState, self).__init__(outcomes = ['done','getNewMove'],
                                              input_keys=['input_velocity','input_rotation_rate'])
 
         # Store state parameter for later use.
         #self._target_time           = rospy.Duration(target_time)
         self._twist                 = TwistStamped()
-        self._twist.twist.linear.x  = velocity
-        self._twist.twist.angular.z = rotation_rate
+        #self._twist.twist.linear.x  = velocity
+        #self._twist.twist.angular.z = rotation_rate
 
         # The constructor is called when building the state machine, not when actually starting the behavior.
         # Thus, we cannot save the starting time now and will do so later.
@@ -59,13 +59,23 @@ class KyleTwistState(EventState):
     #        return 'done'
 
         # Normal operation
+        #self._twist.twist.linear.x = 1.0
+        #self._twist.twist.angular.z = 1.0
+
+        self._twist.twist.linear.x = userdata.input_velocity.data/1000
+        self._twist.twist.angular.z = userdata.input_rotation_rate.data/1000
+
         self._twist.header.stamp = rospy.Time.now()  # update the timestamp
         self._pub.publish(self._cmd_topic, self._twist)
-        return None
+        if (userdata.input_rotation_rate.data > -35) and (userdata.input_rotation_rate.data < 35) :
+            return 'done'
+        return 'getNewMove'
 
     def on_enter(self, userdata):
         # This method is called when the state becomes active, i.e. a transition from another state to this one is taken.
         self._start_time = rospy.Time.now()
         self._done       = None # reset the completion flag
-        self._twist.twist.linear.x = userdata.input_velocity
-        self._twist.twist.angular.z = userdata.input_rotation_rate
+        #self._twist.twist.linear.x = 1.0
+        #self._twist.twist.angular.z = 1.0
+        self._twist.twist.linear.x = userdata.input_velocity.data/1000
+        self._twist.twist.angular.z = userdata.input_rotation_rate.data/1000

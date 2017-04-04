@@ -8,10 +8,9 @@
 
 from flexbe_core import Behavior, Autonomy, OperatableStateMachine, ConcurrencyContainer, PriorityContainer, Logger
 from flexbe_states.subscriber_state import SubscriberState
-from flexbe_states.calculation_state import CalculationState
-from flexbe_states.decision_state import DecisionState
-from cpsc495_flexbe_flexbe_states.timed_twist_state import TimedTwistState
 from flexbe_states.wait_state import WaitState
+from flexbe_states.operator_decision_state import OperatorDecisionState
+from cpsc495_flexbe_flexbe_states.kyle_twist_state import KyleTwistState
 # Additional imports can be added inside the following tags
 # [MANUAL_IMPORT]
 
@@ -56,44 +55,12 @@ class Lab5_State_MachineSM(Behavior):
 
 
 		with _state_machine:
-			# x:409 y:290
+			# x:102 y:130
 			OperatableStateMachine.add('GetTwistCommand',
-										SubscriberState(topic=makethisup, blocking=True, clear=False),
-										transitions={'received': 'Move_The_Robot', 'unavailable': 'failed'},
+										SubscriberState(topic="/makethisupvel", blocking=True, clear=False),
+										transitions={'received': 'getang', 'unavailable': 'failed'},
 										autonomy={'received': Autonomy.Off, 'unavailable': Autonomy.Off},
-										remapping={'message': 'myTwistCommand'})
-
-			# x:293 y:51
-			OperatableStateMachine.add('Calculate_DIFF_FROM_DESIRED',
-										CalculationState(calculation=lambda x: x +2),
-										transitions={'done': 'IS_ROBOT_CENTERED'},
-										autonomy={'done': Autonomy.Off},
-										remapping={'input_value': 'BALL_XY', 'output_value': 'DISTANCE_FROM_BALL'})
-
-			# x:538 y:128
-			OperatableStateMachine.add('IS_ROBOT_CENTERED',
-										DecisionState(outcomes=["centered", "not_centered"], conditions=DISTANCE_FROM_BALL),
-										transitions={'centered': 'Stay Still', 'not_centered': 'MOVE_ROBOT'},
-										autonomy={'centered': Autonomy.Off, 'not_centered': Autonomy.Off},
-										remapping={'input_value': 'DISTANCE_FROM_BALL'})
-
-			# x:739 y:161
-			OperatableStateMachine.add('MOVE_ROBOT',
-										TimedTwistState(target_time=5, velocity=5, rotation_rate=5, cmd_topic='cmd_vel'),
-										transitions={'done': 'finished'},
-										autonomy={'done': Autonomy.Off})
-
-			# x:719 y:72
-			OperatableStateMachine.add('Stay Still',
-										TimedTwistState(target_time=0, velocity=0, rotation_rate=0, cmd_topic='cmd_vel'),
-										transitions={'done': 'finished'},
-										autonomy={'done': Autonomy.Off})
-
-			# x:660 y:328
-			OperatableStateMachine.add('Move_The_Robot',
-										TimedTwistState(target_time=.1, velocity=myTwistCommand.linear, rotation_rate=myTwistCommand.angular, cmd_topic='cmd_vel'),
-										transitions={'done': 'simpleWait'},
-										autonomy={'done': Autonomy.Off})
+										remapping={'message': 'velocitymy'})
 
 			# x:471 y:488
 			OperatableStateMachine.add('simpleWait',
@@ -101,12 +68,25 @@ class Lab5_State_MachineSM(Behavior):
 										transitions={'done': 'GetTwistCommand'},
 										autonomy={'done': Autonomy.Off})
 
-			# x:178 y:31
-			OperatableStateMachine.add('Get_Ball_XY',
-										SubscriberState(topic=/mine/makethisup, blocking=True, clear=False),
-										transitions={'received': 'Calculate_DIFF_FROM_DESIRED', 'unavailable': 'failed'},
+			# x:864 y:316
+			OperatableStateMachine.add('Should_Robot_Finish',
+										OperatorDecisionState(outcomes=["yes", "no"], hint="Should the Robot Stop?", suggestion=None),
+										transitions={'yes': 'finished', 'no': 'simpleWait'},
+										autonomy={'yes': Autonomy.Off, 'no': Autonomy.Off})
+
+			# x:441 y:214
+			OperatableStateMachine.add('mvoe',
+										KyleTwistState(cmd_topic='/turtlebot/stamped_cmd_vel_mux/input/navi'),
+										transitions={'done': 'Should_Robot_Finish', 'getNewMove': 'GetTwistCommand'},
+										autonomy={'done': Autonomy.Off, 'getNewMove': Autonomy.Off},
+										remapping={'input_velocity': 'velocitymy', 'input_rotation_rate': 'angularmy'})
+
+			# x:249 y:85
+			OperatableStateMachine.add('getang',
+										SubscriberState(topic="/makethisupang", blocking=True, clear=False),
+										transitions={'received': 'mvoe', 'unavailable': 'failed'},
 										autonomy={'received': Autonomy.Off, 'unavailable': Autonomy.Off},
-										remapping={'message': 'BALL_XY'})
+										remapping={'message': 'angularmy'})
 
 
 		return _state_machine

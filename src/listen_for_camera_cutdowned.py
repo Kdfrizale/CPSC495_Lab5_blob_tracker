@@ -2,7 +2,7 @@
 import roslib
 from cv_bridge import CvBridge, CvBridgeError
 import rospy
-from std_msgs.msg import Int32
+from std_msgs.msg import Float32
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Image
 from collections import deque
@@ -41,8 +41,8 @@ def draw_flow(img, flow, step=16): #step = 16, named parameter
 
 def findBlob(imageReceived):
     ##ROS SETUP FOR PUBLISHER
-    pub = rospy.Publisher('makethisupang', Int32, queue_size=10)###CHANGE TO CORRECT TOPIC TO PUBLISH TO
-    pub2 = rospy.Publisher('makethisupvel', Int32, queue_size=10)
+    pub = rospy.Publisher('makethisupang', Float32, queue_size=10)###CHANGE TO CORRECT TOPIC TO PUBLISH TO
+    pub2 = rospy.Publisher('makethisupvel', Float32, queue_size=10)
 
     ##Convert ROS NODE PICTURE TO CV2 FORMAT
     myBridge = CvBridge()
@@ -147,11 +147,16 @@ def findBlob(imageReceived):
         print ball_y
 
         ###Publish command
-        formatted_result = Twist()
-        formatted_result.linear.x = Kpv*(Ydesired - ball_y)
-        formatted_result.angular.x = Kpw*(Xdesired - ball_x)
-        pub2.publish(int(Kpv*(Ydesired - ball_y)/100))
-        pub.publish(int(Kpw*(Xdesired - ball_x)/100))
+        velocityData = Float32()
+        angularData = Float32()
+        velocityData.data = float(Kpv*(Ydesired - ball_y))
+        angularData.data = float(Kpw*(Xdesired - ball_x))
+
+        print float(Kpv*(Ydesired - ball_y))
+        print float(Kpw*(Xdesired - ball_x))
+
+        pub2.publish(velocityData)
+        pub.publish(angularData)
     cv2.imshow('image', res)
     cv2.imshow('yay', Gaussianframe)
     k = cv2.waitKey(5) & 0xFF
