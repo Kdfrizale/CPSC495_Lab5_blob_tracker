@@ -3,13 +3,14 @@ roslaunch chris_world_models gazebo_empty_world.launch
 roslaunch chris_turtlebot_bringup chris_turtlebot_gazebo.launch
 --------------------------------------------------------------
 
-rosrun Lab5_blob_tracker listen_for_camera.py 
+rosrun Lab5_blob_tracker listen_for_camera_cutdown.py 
 roslaunch cpsc495_flexbe_behaviors cpsc495_flexbe_behaviors.launch
 
 
 
 ----------------------------
 State machine files located at CPSC495/src/cpsc495_flexbe/cpsc495_flexbe_behaviors/src/cpsc495_flexbe_behaviors
+State machine states located at CPSC495/src/cpsc495_flexbe/cpsc495_flexbe_flexbe_states/src/cpsc495_flexbe_states
 
 
 -----------
@@ -19,7 +20,8 @@ turtlebot topic publishes picture feed to-- topic : /turtlebot/camera/rgb/image_
 
 ----------------------------
 
-Lab5_Blab_find node publishes XY of ball to-- topic : /makethisup
+Lab5_Blab_find node publishes angular roattion needed to-- topic : /makethisupang
+                              velocity needed to-- topic : /makethisupvel
 
 
 
