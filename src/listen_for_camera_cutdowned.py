@@ -96,6 +96,7 @@ def findBlob(imageReceived):
     Gaussianframe=cv2.GaussianBlur(frame,(5,5),0)
     #convert to HSV from BGR
     hsv=cv2.cvtColor(Gaussianframe, cv2.COLOR_BGR2HSV)
+    cv2.imshow("raw hsv",hsv)
 
     #cv2.imshow('flow_mask', draw_flow(mask, flow))
     #read trackbar positions for all
@@ -111,6 +112,8 @@ def findBlob(imageReceived):
 
     #apply the range on a mask
     mask = cv2.inRange(hsv,HSVLOW, HSVHIGH)
+    cv2.imshow("inRange mask",mask)
+
     res = cv2.bitwise_and(Gaussianframe,Gaussianframe, mask =mask)
     ##cv2.imshow('flow_mask', draw_flow(mask, flow))
     cnts = cv2.findContours(mask, cv2.RETR_EXTERNAL,
