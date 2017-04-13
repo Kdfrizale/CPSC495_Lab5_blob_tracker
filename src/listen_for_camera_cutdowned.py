@@ -120,6 +120,12 @@ def findBlob(imageReceived):
     cv2.CHAIN_APPROX_SIMPLE)[-2]
     center = None
 
+    ###Calculate how to move the robot to aling ball in image
+    Ydesired = 240 ###Half of the height of the image
+    Xdesired = 320 ###Half of the width of the image
+    Kpv = -1
+    Kpw = 1
+        
     #For finding contours and drawing circle around focal point
     if len(cnts) > 0:
         print "WOOOOOW"
@@ -131,35 +137,24 @@ def findBlob(imageReceived):
             center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
             ball_x =int(M["m10"] / M["m00"])
             ball_y =int(M["m01"] / M["m00"])
+            ###Publish command
+            velocityData = Float32()
+            angularData = Float32()
+            velocityData.data = float(Kpv*(Ydesired - ball_y))
+            angularData.data = float(Kpw*(Xdesired - ball_x))
+            pub2.publish(velocityData)
+            pub.publish(angularData)
 
         if radius > 10:
             cv2.circle(Gaussianframe, (int(x), int(y)), int(radius),
                 (0, 255, 255), 2)
             cv2.circle(Gaussianframe, center, 1, (0, 0, 255), -1)
 
-        print center
-        ##pts.appendleft(center)
+    
 
-        ###Calculate how to move the robot to aling ball in image
-        Ydesired = 240 ###Half of the height of the image
-        Xdesired = 320 ###Half of the width of the image
-        Kpv = -1
-        Kpw = 1
+       
 
-        print ball_x
-        print ball_y
-
-        ###Publish command
-        velocityData = Float32()
-        angularData = Float32()
-        velocityData.data = float(Kpv*(Ydesired - ball_y))
-        angularData.data = float(Kpw*(Xdesired - ball_x))
-
-        print float(Kpv*(Ydesired - ball_y))
-        print float(Kpw*(Xdesired - ball_x))
-
-        pub2.publish(velocityData)
-        pub.publish(angularData)
+        
     cv2.imshow('image', res)
     cv2.imshow('yay', Gaussianframe)
     k = cv2.waitKey(5) & 0xFF
