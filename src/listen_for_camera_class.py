@@ -21,30 +21,35 @@ sl='Saturation Low'
 vh='Value High'
 vl='Value Low'
 
+cv2.namedWindow('image')
+
 class Camera_Listener:
     def __init__(self):
         self.pubvel = rospy.Publisher('makethisupvel', Float32, queue_size=10)
         self.pubang = rospy.Publisher('makethisupang', Float32, queue_size=10)
 
-        cv2.namedWindow('image')
+        self.myBridge = CvBridge()
+
+
         cv2.createTrackbar(hl, 'image',0,179,nothing)
         cv2.createTrackbar(hh, 'image',0,179,nothing)
         cv2.createTrackbar(sl, 'image',0,255,nothing)
         cv2.createTrackbar(sh, 'image',0,255,nothing)
         cv2.createTrackbar(vl, 'image',0,255,nothing)
         cv2.createTrackbar(vh, 'image',0,255,nothing)
+        cv2.waitKey(0)
 
     def findBlob(self,imageReceived):
         ##Convert ROS NODE PICTURE TO CV2 FORMAT
-        myBridge = CvBridge()
-        cv_image = myBridge.imgmsg_to_cv2(imageReceived,"bgr8")
-
+        cv_image = self.myBridge.imgmsg_to_cv2(imageReceived,"bgr8")
         frame = cv_image
-
         Gaussianframe=cv2.GaussianBlur(frame,(5,5),0)
         #convert to HSV from BGR
+
         hsv=cv2.cvtColor(Gaussianframe, cv2.COLOR_BGR2HSV)
+
         cv2.imshow("raw hsv",hsv)
+
 
         #read trackbar positions for all
         hul=cv2.getTrackbarPos(hl, 'image')
@@ -56,11 +61,10 @@ class Camera_Listener:
         #make array for final values
         HSVLOW=np.array([hul,sal,val])
         HSVHIGH=np.array([huh,sah,vah])
-
         #apply the range on a mask
         mask = cv2.inRange(hsv,HSVLOW, HSVHIGH)
         cv2.imshow("inRange mask",mask)
-
+        cv2.waitKey(0)
         res = cv2.bitwise_and(Gaussianframe,Gaussianframe, mask =mask)
         cnts = cv2.findContours(mask, cv2.RETR_EXTERNAL,
         cv2.CHAIN_APPROX_SIMPLE)[-2]
@@ -95,7 +99,7 @@ class Camera_Listener:
                 cv2.circle(Gaussianframe, center, 1, (0, 0, 255), -1)
 
         cv2.imshow('image', res)
-        cv2.imshow('Gaussianframe', Gaussianframe)
+        #cv2.imshow('Gaussianframe', Gaussianframe)
         k = cv2.waitKey(5) & 0xFF
 
 
