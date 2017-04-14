@@ -125,7 +125,7 @@ def findBlob(imageReceived):
     Xdesired = 320 ###Half of the width of the image
     Kpv = -1
     Kpw = 1
-        
+
     #For finding contours and drawing circle around focal point
     if len(cnts) > 0:
         print "WOOOOOW"
@@ -149,12 +149,14 @@ def findBlob(imageReceived):
             cv2.circle(Gaussianframe, (int(x), int(y)), int(radius),
                 (0, 255, 255), 2)
             cv2.circle(Gaussianframe, center, 1, (0, 0, 255), -1)
+    else :
+        pub2.publish(7777.0)#code to signify ball not found
+        pub.publish(7777.0)
 
-    
 
-       
 
-        
+
+
     cv2.imshow('image', res)
     cv2.imshow('yay', Gaussianframe)
     k = cv2.waitKey(5) & 0xFF
